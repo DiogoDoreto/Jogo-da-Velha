@@ -14,14 +14,14 @@ GREP=grep
 NM=nm
 CCADMIN=CCadmin
 RANLIB=ranlib
-CC=gcc.exe
-CCC=
-CXX=
+CC=gcc
+CCC=g++
+CXX=g++
 FC=
-AS=as.exe
+AS=as
 
 # Macros
-CND_PLATFORM=MinGW-Windows
+CND_PLATFORM=GNU-Linux-x86
 CND_CONF=Debug
 CND_DISTDIR=dist
 
@@ -54,10 +54,10 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-Debug.mk dist/Debug/MinGW-Windows/jogo_da_velha.exe
+	"${MAKE}"  -f nbproject/Makefile-Debug.mk dist/Debug/GNU-Linux-x86/jogo_da_velha
 
-dist/Debug/MinGW-Windows/jogo_da_velha.exe: ${OBJECTFILES}
-	${MKDIR} -p dist/Debug/MinGW-Windows
+dist/Debug/GNU-Linux-x86/jogo_da_velha: ${OBJECTFILES}
+	${MKDIR} -p dist/Debug/GNU-Linux-x86
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/jogo_da_velha ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
 ${OBJECTDIR}/main.o: main.c 
@@ -71,7 +71,7 @@ ${OBJECTDIR}/main.o: main.c
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r build/Debug
-	${RM} dist/Debug/MinGW-Windows/jogo_da_velha.exe
+	${RM} dist/Debug/GNU-Linux-x86/jogo_da_velha
 
 # Subprojects
 .clean-subprojects:
