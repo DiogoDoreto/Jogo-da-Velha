@@ -113,6 +113,8 @@ int main(int argc, char** argv) {
     return (EXIT_SUCCESS);
 }
 
+/** Início das implementações */
+
 void initJogo(tipoJogo *jogo, int modo) {
     jogo->modoJogo = modo;
 
@@ -131,8 +133,6 @@ void initJogo(tipoJogo *jogo, int modo) {
     else
         jogada->ultJogador = aleatorio(1, 2);
 
-    printf("\nj: %d\n", jogada->ultJogador);
-
     jogada->anterior = NULL;
 
     jogo->vencedor = NULL;
@@ -140,3 +140,36 @@ void initJogo(tipoJogo *jogo, int modo) {
     jogo->historico.qtd = 1;
 }
 
+int*** _calculaPosicaoLivre(int *jogo[3][3]) {
+    int **posicoesLivres[9];
+    int i = -1, j, p = 0;
+
+    // Procura e guarda as posições livres no vetor {posicoesLivres[]}
+    while (++i < 3) {
+        j = -1;
+        while (++j < 3) {
+            if (0 == *jogo[i][j]) {
+                posicoesLivres[p++] = jogo[i][j];
+            }
+        }
+    }
+
+    // Sorteia uma posição e a retorna
+    return posicoesLivres[aleatorio(0, p-1)];
+}
+
+void leJogada(tipoJogo *jogo) {
+    if (jogo->modoJogo == SINGLEPLAYER) {
+        if (JOGADOR1 == jogo->historico.ultima->ultJogador) {
+            // Vez do computador
+            printf("O computador está pensando...\n\n");
+
+            // Calcula uma posição livre aleatoria para jogada
+            int ***posicao = _calculaPosicaoLivre(&jogo->historico.ultima->jogo);
+        }
+    }
+}
+
+int verificaFim(tipoJogo *jogo) {
+
+}
