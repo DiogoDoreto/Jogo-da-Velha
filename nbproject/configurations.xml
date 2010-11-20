@@ -5,6 +5,8 @@
                    displayName="Arquivos de cabeçalho"
                    projectFiles="true"
                    kind="SOURCE_LOGICAL_FOLDER">
+      <itemPath>funcoes_aux.h</itemPath>
+      <itemPath>graficos.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Arquivos de código-fonte"
