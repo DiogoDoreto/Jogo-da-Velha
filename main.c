@@ -195,19 +195,44 @@ void _novaJogada(tipoHistorico *hist) {
     hist->qtd++;
 }
 
-void _leAcaoJogador(tipoJogada *jogada, int *lin, int *col) {
+/**
+ * Faz a leitura da jogada para o modo MULTIPLAYER.
+ * Retorna os valores para os ponteiros {lin} e
+ * {col} passados.
+ * @param jogada Ultima jogada do histórico
+ * @param lin Ponteiro que receberá a linha da jogada
+ * @param col Ponteiro que receberá a coluna da jogada
+ */
+void _leAcaoJogadorMultip(tipoJogada *jogada, int *lin, int *col) {
     (*lin) = -1;
     do {
         if ((*lin) != -1) {
             printf("\n** Esta posição não está disponível! **\n\n");
         }
         imprimeJogo(jogada->jogo);
+        do {
+            printf("\n\nDigite a linha e a coluna que deseja realizar a jogada.\n-> ");
+            scanf(" %d %d", lin, col);
+        } while (*lin < 1 || *lin > 3 || *col < 1 || *col > 3);
+        (*lin)--;
+        (*col)--;
+        printf("\n");
+    } while (VALOR_VAZIO != jogada->jogo[*lin][*col]);
+}
+
+void _leAcaoJogadorSinglep(tipoHistorico *hist, int *lin, int *col) {
+    (*lin) = -1;
+    do {
+        if ((*lin) != -1) {
+            printf("\n** Esta posição não está disponível! **\n\n");
+        }
+        imprimeJogo(hist->ultima->jogo);
         printf("\n\nDigite a linha e a coluna que deseja realizar a jogada.\n-> ");
         scanf(" %d %d", lin, col);
         (*lin)--;
         (*col)--;
         printf("\n");
-    } while (VALOR_VAZIO != jogada->jogo[*lin][*col]);
+    } while (VALOR_VAZIO != hist->ultima->jogo[*lin][*col]);
 }
 
 void leJogada(tipoJogo *jogo) {
@@ -227,7 +252,7 @@ void leJogada(tipoJogo *jogo) {
         } else {
             // Vez do jogador 1
             printf("* Vez do jogador 1:\n\n");
-            _leAcaoJogador(jogo->historico.ultima, &lin, &col);
+            _leAcaoJogadorSinglep(&(jogo->historico), &lin, &col);
 
             jogo->historico.ultima->jogo[lin][col] = VALOR_O;
             jogo->historico.ultima->ultJogador = JOGADOR1;
@@ -236,14 +261,14 @@ void leJogada(tipoJogo *jogo) {
         if (JOGADOR2 == jogo->historico.ultima->anterior->ultJogador) {
             // Vez do JOGADOR1
             printf("* Vez do jogador 1:\n\n");
-            _leAcaoJogador(jogo->historico.ultima, &lin, &col);
+            _leAcaoJogadorMultip(jogo->historico.ultima, &lin, &col);
 
             jogo->historico.ultima->jogo[lin][col] = VALOR_X;
             jogo->historico.ultima->ultJogador = JOGADOR1;
         } else {
             // Vez do JOGADOR2
             printf("* Vez do jogador 2:\n\n");
-            _leAcaoJogador(jogo->historico.ultima, &lin, &col);
+            _leAcaoJogadorMultip(jogo->historico.ultima, &lin, &col);
 
             jogo->historico.ultima->jogo[lin][col] = VALOR_O;
             jogo->historico.ultima->ultJogador = JOGADOR2;
