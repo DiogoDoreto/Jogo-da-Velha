@@ -24,6 +24,15 @@
 #define EMPATE -1
 
 /**
+ * Obs.:
+ *  - Em singleplayer:
+ *    > CPU      = VALOR_X
+ *    > JOGADOR1 = VALOR_O
+ * 
+ *  - Em multiplayer:
+ *    > JOGADOR1 = VALOR_X
+ *    > JOGADOR2 = VALOR_O
+ *
  * Exemplo do jogo:
  *    x | o | x
  *   ---|---|---
@@ -95,7 +104,7 @@ int main(int argc, char** argv) {
             leJogada(&jogo);
         } while (!verificaFim(&jogo));
 
-        printf("\n** Fim de Jogo!\n");
+        printf("\n** Fim de Jogo! **\n");
         switch (jogo.vencedor) {
             case CPU:
                 printf("Que pena, o computador ganhou... tente de novo!");
@@ -121,7 +130,7 @@ void initJogo(tipoJogo *jogo, int modo) {
     jogo->modoJogo = modo;
 
     // Inicia primeira jogada (em branco)
-    tipoJogada *jogada = malloc(sizeof(tipoJogada));
+    tipoJogada *jogada = (tipoJogada*) malloc(sizeof(tipoJogada));
     
     // Inicializa matriz do jogo
     int i = -1, j;
@@ -142,6 +151,11 @@ void initJogo(tipoJogo *jogo, int modo) {
     jogo->historico.qtd = 1;
 }
 
+/**
+ * Analiza as posições livres do jogo e retorna uma aleatória
+ * @param jogo Matriz contendo a ultima jogada
+ * @return Posição livre aleatória
+ */
 int* _calculaPosicaoLivre(int jogo[3][3]) {
     int *posicoesLivres = (int*) malloc(sizeof(int*)*9);
     int i = -1, j, p = 0;
@@ -161,8 +175,8 @@ int* _calculaPosicaoLivre(int jogo[3][3]) {
 }
 
 /**
- *
- * @param hist
+ * Cria uma jogada nova no histórico de jogadas
+ * @param hist Histórico de jogadas
  */
 void _novaJogada(tipoHistorico *hist) {
     tipoJogada *novaJogada = (tipoJogada*) malloc(sizeof(tipoJogada));
@@ -181,7 +195,23 @@ void _novaJogada(tipoHistorico *hist) {
     hist->qtd++;
 }
 
+void _leAcaoJogador(tipoJogada *jogada, int *lin, int *col) {
+    (*lin) = -1;
+    do {
+        if ((*lin) != -1) {
+            printf("\n** Esta posição não está disponível! **\n\n");
+        }
+        imprimeJogo(jogada->jogo);
+        printf("\n\nDigite a linha e a coluna que deseja realizar a jogada.\n-> ");
+        scanf(" %d %d", lin, col);
+        (*lin)--;
+        (*col)--;
+        printf("\n");
+    } while (VALOR_VAZIO != jogada->jogo[*lin][*col]);
+}
+
 void leJogada(tipoJogo *jogo) {
+    int lin, col;
     // Gera a nova jogada
     _novaJogada(&jogo->historico);
     if (jogo->modoJogo == SINGLEPLAYER) {
@@ -196,20 +226,27 @@ void leJogada(tipoJogo *jogo) {
             jogo->historico.ultima->ultJogador = CPU;
         } else {
             // Vez do jogador 1
-            int lin = -1, col = -1;
-            do {
-                if (lin != -1) {
-                    printf("\nEsta posição não está disponível");
-                }
-                imprimeJogo(jogo->historico.ultima->jogo);
-                printf("\n\nDigite a linha e a coluna que deseja realizar a jogada.\n-> ");
-                scanf(" %d %d", &lin, &col);
-                lin--; col--;
-                printf("\n");
-            } while (VALOR_VAZIO != jogo->historico.ultima->jogo[lin][col]);
+            printf("* Vez do jogador 1:\n\n");
+            _leAcaoJogador(jogo->historico.ultima, &lin, &col);
 
             jogo->historico.ultima->jogo[lin][col] = VALOR_O;
             jogo->historico.ultima->ultJogador = JOGADOR1;
+        }
+    } else { // MULTIPLAYER
+        if (JOGADOR2 == jogo->historico.ultima->anterior->ultJogador) {
+            // Vez do JOGADOR1
+            printf("* Vez do jogador 1:\n\n");
+            _leAcaoJogador(jogo->historico.ultima, &lin, &col);
+
+            jogo->historico.ultima->jogo[lin][col] = VALOR_X;
+            jogo->historico.ultima->ultJogador = JOGADOR1;
+        } else {
+            // Vez do JOGADOR2
+            printf("* Vez do jogador 2:\n\n");
+            _leAcaoJogador(jogo->historico.ultima, &lin, &col);
+
+            jogo->historico.ultima->jogo[lin][col] = VALOR_O;
+            jogo->historico.ultima->ultJogador = JOGADOR2;
         }
     }
 }
