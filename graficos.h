@@ -41,7 +41,7 @@ extern "C" {
                     printf("|");
             }
             if (i != 2)
-                printf("---|---|---");
+                printf("\n---|---|---\n");
         }
     }
 

@@ -36,7 +36,8 @@ extern "C" {
      */
     int aleatorio(int min, int max) {
         srand((unsigned int) time(NULL));
-        return (int) (rand() % (max + 1 - min)) + min;
+        int num = (int) (rand() % (max + 1 - min)) + min;
+        return num;
     }
 
 

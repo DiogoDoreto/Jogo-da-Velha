@@ -58,6 +58,8 @@ typedef struct jogo {
     int vencedor;
 } tipoJogo;
 
+/** Funções principais do jogo */
+
 /**
  * Inicia o jogo
  * @param jogo Jogo a ser iniciado
@@ -94,13 +96,13 @@ int main(int argc, char** argv) {
         } while (!verificaFim(&jogo));
 
         printf("\n** Fim de Jogo!\n");
-        switch (jogo->vencedor) {
+        switch (jogo.vencedor) {
             case CPU:
                 printf("Que pena, o computador ganhou... tente de novo!");
                 break;
             case JOGADOR1:
             case JOGADOR2:
-                printf("Parabéns, jogador %d, você venceu!", jogo->vencedor);
+                printf("Parabéns, jogador %d, você venceu!", jogo.vencedor);
                 break;
             default:
                 printf("Deu velha! :)");
@@ -140,16 +142,16 @@ void initJogo(tipoJogo *jogo, int modo) {
     jogo->historico.qtd = 1;
 }
 
-int*** _calculaPosicaoLivre(int *jogo[3][3]) {
-    int **posicoesLivres[9];
+int* _calculaPosicaoLivre(int jogo[3][3]) {
+    int *posicoesLivres = (int*) malloc(sizeof(int*)*9);
     int i = -1, j, p = 0;
 
     // Procura e guarda as posições livres no vetor {posicoesLivres[]}
     while (++i < 3) {
         j = -1;
         while (++j < 3) {
-            if (0 == *jogo[i][j]) {
-                posicoesLivres[p++] = jogo[i][j];
+            if (0 == jogo[i][j]) {
+                posicoesLivres[p++] = &jogo[i][j];
             }
         }
     }
@@ -158,18 +160,60 @@ int*** _calculaPosicaoLivre(int *jogo[3][3]) {
     return posicoesLivres[aleatorio(0, p-1)];
 }
 
+/**
+ *
+ * @param hist
+ */
+void _novaJogada(tipoHistorico *hist) {
+    tipoJogada *novaJogada = (tipoJogada*) malloc(sizeof(tipoJogada));
+
+    // Clona jogada
+    int i = -1, j;
+    while (++i < 3) {
+        j = -1;
+        while (++j < 3) {
+            novaJogada->jogo[i][j] = hist->ultima->jogo[i][j];
+        }
+    }
+
+    novaJogada->anterior = hist->ultima;
+    hist->ultima = novaJogada;
+    hist->qtd++;
+}
+
 void leJogada(tipoJogo *jogo) {
+    // Gera a nova jogada
+    _novaJogada(&jogo->historico);
     if (jogo->modoJogo == SINGLEPLAYER) {
-        if (JOGADOR1 == jogo->historico.ultima->ultJogador) {
+        if (JOGADOR1 == jogo->historico.ultima->anterior->ultJogador) {
             // Vez do computador
             printf("O computador está pensando...\n\n");
 
             // Calcula uma posição livre aleatoria para jogada
-            int ***posicao = _calculaPosicaoLivre(&jogo->historico.ultima->jogo);
+            int *posicao = _calculaPosicaoLivre(jogo->historico.ultima->jogo);
+            *posicao = VALOR_X;
+
+            jogo->historico.ultima->ultJogador = CPU;
+        } else {
+            // Vez do jogador 1
+            int lin = -1, col = -1;
+            do {
+                if (lin != -1) {
+                    printf("\nEsta posição não está disponível");
+                }
+                imprimeJogo(jogo->historico.ultima->jogo);
+                printf("\n\nDigite a linha e a coluna que deseja realizar a jogada.\n-> ");
+                scanf(" %d %d", &lin, &col);
+                lin--; col--;
+                printf("\n");
+            } while (VALOR_VAZIO != jogo->historico.ultima->jogo[lin][col]);
+
+            jogo->historico.ultima->jogo[lin][col] = VALOR_O;
+            jogo->historico.ultima->ultJogador = JOGADOR1;
         }
     }
 }
 
 int verificaFim(tipoJogo *jogo) {
-
+    return 0;
 }
