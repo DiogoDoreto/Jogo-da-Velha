@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
     int modo;
 
     do {
-        printf("Escolha o modo de jogo:\n\n"
+        printf("\nEscolha o modo de jogo:\n\n"
                 "  [0] Contra o PC;\n"
                 "  [1] Contra outra pessoa;\n\n-> ");
         scanf(" %d", &modo);
@@ -105,6 +105,8 @@ int main(int argc, char** argv) {
         } while (!verificaFim(&jogo));
 
         printf("\n** Fim de Jogo! **\n");
+        imprimeJogo(jogo.historico.ultima->jogo);
+        printf("\n** Fim de Jogo! **\n\n");
         switch (jogo.vencedor) {
             case CPU:
                 printf("Que pena, o computador ganhou... tente de novo!");
@@ -124,7 +126,7 @@ int main(int argc, char** argv) {
     return (EXIT_SUCCESS);
 }
 
-/** Início das implementações */
+/** Início das implementações da funções principais e das funções auxiliares */
 
 void initJogo(tipoJogo *jogo, int modo) {
     jogo->modoJogo = modo;
@@ -309,5 +311,74 @@ void leJogada(tipoJogo *jogo) {
 }
 
 int verificaFim(tipoJogo *jogo) {
+    int i = -1;
+    while (++i < 3) {
+        // Checa linha {i}
+        if (jogo->historico.ultima->jogo[i][0] ==
+                jogo->historico.ultima->jogo[i][1] &&
+                jogo->historico.ultima->jogo[i][1] ==
+                jogo->historico.ultima->jogo[i][2] &&
+                jogo->historico.ultima->jogo[i][0] != VALOR_VAZIO) {
+            if (jogo->modoJogo == SINGLEPLAYER) {
+                jogo->vencedor = jogo->historico.ultima->jogo[i][0] == VALOR_X ?
+                    CPU : JOGADOR1;
+            } else {
+                jogo->vencedor = jogo->historico.ultima->jogo[i][0] == VALOR_X ?
+                    JOGADOR1 : JOGADOR2;
+            }
+            return 1;
+        }
+        // Checa coluna {i}
+        if (jogo->historico.ultima->jogo[0][i] ==
+                jogo->historico.ultima->jogo[1][i] &&
+                jogo->historico.ultima->jogo[1][i] ==
+                jogo->historico.ultima->jogo[2][i] &&
+                jogo->historico.ultima->jogo[0][i] != VALOR_VAZIO) {
+            if (jogo->modoJogo == SINGLEPLAYER) {
+                jogo->vencedor = jogo->historico.ultima->jogo[0][i] == VALOR_X ?
+                    CPU : JOGADOR1;
+            } else {
+                jogo->vencedor = jogo->historico.ultima->jogo[0][i] == VALOR_X ?
+                    JOGADOR1 : JOGADOR2;
+            }
+            return 1;
+        }
+    }
+    // Checa uma diagonal
+    if (jogo->historico.ultima->jogo[0][0] ==
+            jogo->historico.ultima->jogo[1][1] &&
+            jogo->historico.ultima->jogo[1][1] ==
+            jogo->historico.ultima->jogo[2][2] &&
+            jogo->historico.ultima->jogo[0][0] != VALOR_VAZIO) {
+        if (jogo->modoJogo == SINGLEPLAYER) {
+            jogo->vencedor = jogo->historico.ultima->jogo[0][0] == VALOR_X ?
+                    CPU : JOGADOR1;
+        } else {
+            jogo->vencedor = jogo->historico.ultima->jogo[0][0] == VALOR_X ?
+                    JOGADOR1 : JOGADOR2;
+        }
+        return 1;
+    }
+    // Checa outra diagonal
+    if (jogo->historico.ultima->jogo[0][2] ==
+            jogo->historico.ultima->jogo[1][1] &&
+            jogo->historico.ultima->jogo[1][1] ==
+            jogo->historico.ultima->jogo[2][0] &&
+            jogo->historico.ultima->jogo[0][2] != VALOR_VAZIO) {
+        if (jogo->modoJogo == SINGLEPLAYER) {
+            jogo->vencedor = jogo->historico.ultima->jogo[0][2] == VALOR_X ?
+                    CPU : JOGADOR1;
+        } else {
+            jogo->vencedor = jogo->historico.ultima->jogo[0][2] == VALOR_X ?
+                    JOGADOR1 : JOGADOR2;
+        }
+        return 1;
+    }
+    // Checa se deu velha
+    if (jogo->historico.qtd > 9) {
+        jogo->vencedor = EMPATE;
+        return 1;
+    }
+    // O jogo ainda não acabou
     return 0;
 }
