@@ -7,6 +7,7 @@
 #include <time.h>
 #include "graficos.h"
 #include "funcoes_aux.h"
+#include "arvore_de_jogo.h"
 
 /** Definições de constantes utilizadas no jogo */
 
@@ -278,9 +279,26 @@ void leJogada(tipoJogo *jogo) {
             // Vez do computador
             printf("O computador está pensando...\n\n");
 
+/*
             // Calcula uma posição livre aleatoria para jogada
             int *posicao = _calculaPosicaoLivre(jogo->historico.ultima->jogo);
             *posicao = VALOR_X;
+*/
+            char brdconv[3][3], newbrd[3][3];
+            int i, j, espacos = 0;
+            // converte o tabuleiro de int para char
+            for (i = 0; i < 3; ++i)
+                for (j = 0; j < 3; ++j) {
+                    brdconv[i][j] = jogo->historico.ultima->jogo[i][j] == VALOR_X ? 'x'
+                            : (jogo->historico.ultima->jogo[i][j] == VALOR_O ? 'o' : '-');
+                    if (brdconv[i][j] == '-') espacos++;
+                }
+            nextmove(brdconv, 1, 'x', newbrd);
+            // desconverte {newbrd} de char para int
+            for (i = 0; i < 3; ++i)
+                for (j = 0; j < 3; ++j)
+                    jogo->historico.ultima->jogo[i][j] = newbrd[i][j] == 'x' ? VALOR_X
+                            : (newbrd[i][j] == 'o' ? VALOR_O : VALOR_VAZIO);
 
             jogo->historico.ultima->ultJogador = CPU;
         } else {

@@ -36,11 +36,11 @@ extern "C" {
      * @return Lista dos nós gerados
      */
     noPtr generate(char brd[3][3], char player) {
-        noPtr firstNode, p = NULL;
+        noPtr firstNode = NULL, p = NULL;
         int i, j, k, l;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (' ' == brd[i][j]) {
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 3; j++) {
+                if ('-' == brd[i][j]) {
                     if (p == NULL) {
                         // {p} vazio, então é o 1º elemento da lista
                         firstNode = p = getnode();
@@ -50,9 +50,9 @@ extern "C" {
                         p = p->next;
                     }
                     // Clona o tabuleiro atual...
-                    for (j = 0; j < 3; j++)
-                        for (k = 0; k < 3; k++)
-                            p->board[j][k] = brd[j][k];
+                    for (k = 0; k < 3; k++)
+                        for (l = 0; l < 3; l++)
+                            p->board[k][l] = brd[k][l];
                     // ... e joga o player na posição vazia
                     p->board[i][j] = player;
                 }
@@ -79,7 +79,7 @@ extern "C" {
         noPtr q;
         if (plevel < depth) {
             // p não está no nível máximo
-            q = generate(p->board, player == 'x' ? 'o' : 'x');
+            q = generate(p->board, player);
             p->son = q;
             // Percorre a lista de nós
             while (q != NULL) {
@@ -126,6 +126,7 @@ extern "C" {
      */
     int evaluate(char brd[3][3], int *pvalue, char player) {
         int val = 0, i;
+        player = 'x';
         char adv = player == 'x' ? 'o' : 'x';
 
         for (i = 0; i < 3; ++i) {
@@ -133,8 +134,13 @@ extern "C" {
             if (brd[i][0] != adv && brd[i][1] != adv && brd[i][2] != adv)
                 val++;
 
-            if (brd[i][0] != player && brd[i][1] != player && brd[i][2] != player)
+            if (brd[i][0] != player && brd[i][1] != player && brd[i][2] != player) {
                 val--;
+                if ((brd[i][0] == '-' && brd[i][1] != '-' && brd[i][2] != '-') ||
+                        (brd[i][0] != '-' && brd[i][1] == '-' && brd[i][2] != '-') ||
+                        (brd[i][0] != '-' && brd[i][1] != '-' && brd[i][2] == '-'))
+                   return *pvalue = -9; // Jogada perdedora!
+            }
 
             if (brd[i][0] == player && brd[i][1] == player && brd[i][2] == player)
                 return *pvalue = 9; // Jogada vencedora!
@@ -143,8 +149,13 @@ extern "C" {
             if (brd[0][i] != adv && brd[1][i] != adv && brd[2][i] != adv)
                 val++;
 
-            if (brd[0][i] != player && brd[1][i] != player && brd[2][i] != player)
+            if (brd[0][i] != player && brd[1][i] != player && brd[2][i] != player) {
                 val--;
+                if ((brd[0][i] == '-' && brd[1][i] != '-' && brd[2][i] != '-') ||
+                        (brd[0][i] != '-' && brd[1][i] == '-' && brd[2][i] != '-') ||
+                        (brd[0][i] != '-' && brd[1][i] != '-' && brd[2][i] == '-'))
+                   return *pvalue = -9; // Jogada perdedora!
+            }
 
             if (brd[0][i] == player && brd[1][i] == player && brd[2][i] == player)
                 return *pvalue = 9; // Jogada vencedora!
@@ -153,8 +164,13 @@ extern "C" {
         if (brd[0][0] != adv && brd[1][1] != adv && brd[2][2] != adv)
             val++;
 
-        if (brd[0][0] != player && brd[1][1] != player && brd[2][2] != player)
+        if (brd[0][0] != player && brd[1][1] != player && brd[2][2] != player) {
             val--;
+            if ((brd[0][0] == '-' && brd[1][1] != '-' && brd[2][2] != '-') ||
+                    (brd[0][0] != '-' && brd[1][1] == '-' && brd[2][2] != '-') ||
+                    (brd[0][0] != '-' && brd[1][1] != '-' && brd[2][2] == '-'))
+                return *pvalue = -9; // Jogada perdedora!
+        }
 
         if (brd[0][0] == player && brd[1][1] == player && brd[2][2] == player)
             return *pvalue = 9; // Jogada vencedora!
@@ -163,8 +179,13 @@ extern "C" {
         if (brd[0][2] != adv && brd[1][1] != adv && brd[0][2] != adv)
             val++;
 
-        if (brd[0][2] != player && brd[1][1] != player && brd[0][2] != player)
-            val++;
+        if (brd[0][2] != player && brd[1][1] != player && brd[0][2] != player) {
+            val--;
+            if ((brd[0][2] == '-' && brd[1][1] != '-' && brd[2][0] != '-') ||
+                    (brd[0][2] != '-' && brd[1][1] == '-' && brd[2][0] != '-') ||
+                    (brd[0][2] != '-' && brd[1][1] != '-' && brd[2][0] == '-'))
+                return *pvalue = -9; // Jogada perdedora!
+        }
 
         if (brd[0][2] == player && brd[1][1] == player && brd[0][2] == player)
             return *pvalue = 9; // Jogada vencedora!
@@ -192,7 +213,7 @@ extern "C" {
             p = pnd->son;
             bestbranch(p, player, pbest, pvalue);
             *pbest = p;
-            if (pnd.turn == -1) {
+            if (pnd->turn == -1) {
                 *pvalue = -*pvalue;
             }
             p = p->next;
