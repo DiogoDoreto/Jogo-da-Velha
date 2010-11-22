@@ -220,15 +220,47 @@ void _leAcaoJogadorMultip(tipoJogada *jogada, int *lin, int *col) {
     } while (VALOR_VAZIO != jogada->jogo[*lin][*col]);
 }
 
+/**
+ * Volta uma jogada do histórico (remove da pilha)
+ * @param hist Histórico de jogadas
+ */
+void _voltaJogada(tipoHistorico *hist) {
+    tipoJogada *temp = hist->ultima;
+    hist->ultima = temp->anterior;
+    free(temp);
+}
+
 void _leAcaoJogadorSinglep(tipoHistorico *hist, int *lin, int *col) {
-    (*lin) = -1;
+    char act;
+    (*lin) = (*col) = -1;
     do {
         if ((*lin) != -1) {
             printf("\n** Esta posição não está disponível! **\n\n");
         }
         imprimeJogo(hist->ultima->jogo);
-        printf("\n\nDigite a linha e a coluna que deseja realizar a jogada.\n-> ");
-        scanf(" %d %d", lin, col);
+        do {
+            printf("\n\nDigite a linha e a coluna que deseja realizar a jogada");
+            if (hist->qtd > 3) {
+                printf(",\nou a letra 'z' para voltar uma jogada");
+            }
+            printf(".\n-> ");
+            
+            scanf(" %c", &act);
+            if (act == 'z') {
+                if (hist->qtd > 3) {
+                    _voltaJogada(hist); // Volta a jogada 'nova'
+                    _voltaJogada(hist); // Volta a jogada do CPU
+                    _voltaJogada(hist); // Volta a jogada anterior do JOGADOR1
+                    _novaJogada(hist);  // Cria outra jogada 'nova'
+                    printf("\n");
+                    imprimeJogo(hist->ultima->jogo);
+                }
+                (*lin) = 0;
+            } else {
+                *lin = atoi(&act);
+                scanf(" %d", col);
+            }
+        } while (*lin < 1 || *lin > 3 || *col < 1 || *col > 3);
         (*lin)--;
         (*col)--;
         printf("\n");
