@@ -1,5 +1,10 @@
 /* 
  * File:   main.c
+ *
+ * Trabalho feito por:
+ *  - Diogo Doreto
+ *  - Gustavo Marçon
+ *  - Vitor Pupio
  */
 
 #include <stdio.h>
@@ -155,7 +160,8 @@ void initJogo(tipoJogo *jogo, int modo) {
 }
 
 /**
- * Analiza as posições livres do jogo e retorna uma aleatória
+ * Analiza as posições livres do jogo e retorna uma aleatória (não utilizado no
+ * momento, mas pode ser usado para um nível de dificuldade fácil)
  * @param jogo Matriz contendo a ultima jogada
  * @return Posição livre aleatória
  */
@@ -233,14 +239,46 @@ void _voltaJogada(tipoHistorico *hist) {
     free(temp);
 }
 
+/**
+ * Imprime todas as possibilidades da próxima jogada a partir do jogo passado
+ * como parâmetro.
+ * @param intbrd Matriz contendo uma jogada
+ */
+void _imprimePossibilidades(int intbrd[3][3]) {
+    printf("\n\nDeseja ver a lista de jogadas possíveis? [sim|nao]\n");
+    if (!confirma()) return;
+    // Jogador quis ver as possibilidades, então continua o código:
+    char brd[3][3];
+    int tmpbrd[3][3];
+    _converteMatrizIntParaChar(intbrd, brd);
+    noPtr arvPossib = buildtree(brd, 1, 'o');
+    noPtr no = arvPossib->son;
+    while (no != NULL) {
+        _converteMatrizCharParaInt(no->board, tmpbrd);
+        printf("\n");
+        imprimeJogo(tmpbrd);
+        no = no->next;
+        if (no != NULL) {
+            printf("\nDeseja ver a próxima jogada possível? [sim|nao]\n");
+            if (!confirma()) break;
+        } else
+            printf("\n");
+    }
+    printf("\n** Jogo atual:\n\n");
+    imprimeJogo(intbrd);
+    printf("\n");
+}
+
 void _leAcaoJogadorSinglep(tipoHistorico *hist, int *lin, int *col) {
     char act;
     (*lin) = (*col) = -1;
+
     do {
-        if ((*lin) != -1) {
+        if ((*lin) != -1) { // Não é a 1ª tentativa de jogar
             printf("\n** Esta posição não está disponível! **\n\n");
         }
         imprimeJogo(hist->ultima->jogo);
+        _imprimePossibilidades(hist->ultima->jogo);
         do {
             printf("\n\nDigite a linha e a coluna que deseja realizar a jogada");
             if (hist->qtd > 3) {
@@ -270,6 +308,22 @@ void _leAcaoJogadorSinglep(tipoHistorico *hist, int *lin, int *col) {
     } while (VALOR_VAZIO != hist->ultima->jogo[*lin][*col]);
 }
 
+void _converteMatrizIntParaChar(int origem[3][3], char destino[3][3]) {
+    int lin, col;
+    for (lin = 0; lin < 3; ++lin)
+        for (col = 0; col < 3; ++col)
+            destino[lin][col] = origem[lin][col] == VALOR_X ? 'x'
+                : (origem[lin][col] == VALOR_O ? 'o' : '-');
+}
+
+void _converteMatrizCharParaInt(char origem[3][3], int destino[3][3]) {
+    int lin, col;
+    for (lin = 0; lin < 3; ++lin)
+        for (col = 0; col < 3; ++col)
+            destino[lin][col] = origem[lin][col] == 'x' ? VALOR_X
+                : (origem[lin][col] == 'o' ? VALOR_O : VALOR_VAZIO);
+}
+
 void leJogada(tipoJogo *jogo) {
     int lin, col;
     // Gera a nova jogada
@@ -277,33 +331,23 @@ void leJogada(tipoJogo *jogo) {
     if (jogo->modoJogo == SINGLEPLAYER) {
         if (JOGADOR1 == jogo->historico.ultima->anterior->ultJogador) {
             // Vez do computador
-            printf("O computador está pensando...\n\n");
+            printf("O computador (x) está pensando...\n\n");
 
-/*
-            // Calcula uma posição livre aleatoria para jogada
-            int *posicao = _calculaPosicaoLivre(jogo->historico.ultima->jogo);
-            *posicao = VALOR_X;
-*/
             char brdconv[3][3], newbrd[3][3];
-            int i, j, espacos = 0;
             // converte o tabuleiro de int para char
-            for (i = 0; i < 3; ++i)
-                for (j = 0; j < 3; ++j) {
-                    brdconv[i][j] = jogo->historico.ultima->jogo[i][j] == VALOR_X ? 'x'
-                            : (jogo->historico.ultima->jogo[i][j] == VALOR_O ? 'o' : '-');
-                    if (brdconv[i][j] == '-') espacos++;
-                }
+            _converteMatrizIntParaChar(jogo->historico.ultima->jogo, brdconv);
+
+            // Calcula a próxima jogada
             nextmove(brdconv, 1, 'x', newbrd);
+
             // desconverte {newbrd} de char para int
-            for (i = 0; i < 3; ++i)
-                for (j = 0; j < 3; ++j)
-                    jogo->historico.ultima->jogo[i][j] = newbrd[i][j] == 'x' ? VALOR_X
-                            : (newbrd[i][j] == 'o' ? VALOR_O : VALOR_VAZIO);
+            _converteMatrizCharParaInt(newbrd, jogo->historico.ultima->jogo);
 
             jogo->historico.ultima->ultJogador = CPU;
         } else {
             // Vez do jogador 1
-            printf("* Vez do jogador 1:\n\n");
+            printf("* Vez do jogador 1 (o):\n\n");
+            
             _leAcaoJogadorSinglep(&(jogo->historico), &lin, &col);
 
             jogo->historico.ultima->jogo[lin][col] = VALOR_O;
@@ -312,14 +356,14 @@ void leJogada(tipoJogo *jogo) {
     } else { // MULTIPLAYER
         if (JOGADOR2 == jogo->historico.ultima->anterior->ultJogador) {
             // Vez do JOGADOR1
-            printf("* Vez do jogador 1:\n\n");
+            printf("* Vez do jogador 1 (x):\n\n");
             _leAcaoJogadorMultip(jogo->historico.ultima, &lin, &col);
 
             jogo->historico.ultima->jogo[lin][col] = VALOR_X;
             jogo->historico.ultima->ultJogador = JOGADOR1;
         } else {
             // Vez do JOGADOR2
-            printf("* Vez do jogador 2:\n\n");
+            printf("* Vez do jogador 2 (o):\n\n");
             _leAcaoJogadorMultip(jogo->historico.ultima, &lin, &col);
 
             jogo->historico.ultima->jogo[lin][col] = VALOR_O;

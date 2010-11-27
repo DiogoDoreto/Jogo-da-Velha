@@ -126,7 +126,6 @@ extern "C" {
      */
     int evaluate(char brd[3][3], int *pvalue, char player) {
         int val = 0, i;
-        player = 'x';
         char adv = player == 'x' ? 'o' : 'x';
 
         for (i = 0; i < 3; ++i) {
@@ -194,7 +193,8 @@ extern "C" {
     }
 
     /**
-     * Avalia os nós das árvores
+     * Avalia os nós das árvores e passa para {pbest} o melhor, assim como seu
+     * valor em {pvalue}
      * @param pnd
      * @param player
      * @param pbest Ponteiro para o filho da raiz da árvore que maximiza seu valor

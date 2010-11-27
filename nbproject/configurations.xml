@@ -5,6 +5,7 @@
                    displayName="Arquivos de cabeçalho"
                    projectFiles="true"
                    kind="SOURCE_LOGICAL_FOLDER">
+      <itemPath>arvore_de_jogo.h</itemPath>
       <itemPath>funcoes_aux.h</itemPath>
       <itemPath>graficos.h</itemPath>
     </logicalFolder>
